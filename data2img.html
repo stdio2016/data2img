@@ -31,6 +31,7 @@ function data2img() {
   fr.readAsArrayBuffer(fileIn.files[0]);
 }
 
+var decoded;
 function img2data() {
   var fr = new FileReader()
   fr.onload = function() {
@@ -39,7 +40,8 @@ function img2data() {
     img.onload = function () {
       ctx.drawImage(img, 0, 0);
       var imgdata = ctx.getImageData(0, 0, IMGWIDTH, IMGHEIGHT).data;
-      showData(decodeImg(imgdata));
+      decoded = decodeImg(imgdata);
+      showData(decoded);
     };
     img.onerror = function () {
       alert('This is not an image file');
