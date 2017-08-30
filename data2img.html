@@ -93,7 +93,8 @@ function showData(buffer) {
     }
     else {
       code = (buffer[i] & 7) << 18 | (buffer[i+1] & 63) << 12 | (buffer[i+2] & 63) << 6 | (buffer[i+3] & 63);
-      sb.push(String.fromCharCode(code));
+      sb.push(String.fromCharCode(0xD800 | (code>>10) - 64));
+      sb.push(String.fromCharCode(0xDC00 | code & 0x3ff));
       i += 3;
     }
   }
