@@ -151,12 +151,22 @@ function decodeChunk(x, y, img) {
   }
   return data;
 }
+
+function testGenerator(count) {
+  var y = 1, a = [];
+  for (var i=0;i<65536;i++) {
+    y = y * 5 % 65537;
+    a.push(y & 0xff, y >> 8 & 0xff);
+  }
+  var len = IMGHEIGHT * IMGWIDTH / 64 * 2;
+  return a.slice(len * count, len * (count + 1));
+}
 </script>
 </head>
 <body>
-  <p>Choose file to convert: <input type="file" id="fileIn" accept="text/plain"></p>
+  <p>Choose text to encode (must be UTF8): <input type="file" id="fileIn" accept="text/plain"></p>
   <p><button onclick="data2img()">data -> img</button></p>
-  <p>Choose image to convert: <input type="file" id="fileIn2" accept="image/*"></p>
+  <p>Choose image to decode: <input type="file" id="fileIn2" accept="image/*"></p>
   <p><button onclick="img2data()">img -> data</button></p>
   <canvas id="canvas" width="960" height="720"></canvas>
   <p>Decode result:</p>
