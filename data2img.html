@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>convert data to image</title>
+<style>
+#canvas {
+  max-width: 960px;
+  width: 100%;
+  height: 100%;
+  border: 1px solid black;
+}
+</style>
+<script type="text/javascript">
+var ctx;
+var IMGWIDTH = 960, IMGHEIGHT = 720;
+onload = function () {
+  ctx = canvas.getContext('2d');
+  ctx.font = "30px serif";
+  var text = "Image output here";
+  var w = ctx.measureText(text).width;
+  ctx.fillText(text, (IMGWIDTH - w) / 2, (IMGHEIGHT) / 2);
+};
+function data2img() {
+  var fr = new FileReader();
+  fr.onload = function() {
+    var dat = fr.result;
+    drawBinary(dat);
+  };
+  fr.readAsArrayBuffer(fileIn.files[0]);
+}
+
+function img2data() {
+  var fr = new FileReader()
+  fr.onload = function() {
+    var dat = fr.result;
+    var img = new Image();
+    img.onload = function () {
+      ctx.drawImage(img, 0, 0);
+      var imgdata = ctx.getImageData(0, 0, IMGWIDTH, IMGHEIGHT).data;
+      showData(decodeImg(imgdata));
+    };
+    img.onerror = function () {
+      alert('This is not an image file');
+    };
+    img.src = dat;
+  };
+  fr.readAsDataURL(fileIn2.files[0]);
+}
+
+function drawBinary(binary) {
+  var data = new Uint8Array(binary);
+  ctx.fillStyle = "white";
+  ctx.fillRect(0, 0, IMGWIDTH, IMGHEIGHT);
+  var img = ctx.getImageData(0, 0, IMGWIDTH, IMGHEIGHT);
+  var imgdata = img.data;
+  var i = 0;
+  for (var y = 0; y < IMGHEIGHT / 8; y++) {
+    for (var x = 0; x < IMGWIDTH / 8; x++) {
+      drawChunk(data[i+1] << 8 | data[i], x, y, imgdata);
+      i += 2;
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+  location.assign(canvas.toDataURL());
+}
+
+// data is a 16bit number
+function drawChunk(data, x, y, img) {
+  var offset = (x * 8 + y * 8 * IMGWIDTH) * 4;
+  for (var i = 0; i < 16; i++) {
+    var j = i&3, k = i>>2;
+    var idx = offset + (k * 2 * IMGWIDTH + j * 2) * 4;
+    var bit = (data>>i&1);
+    // draw 2x2 square
+    img[idx + 0] = img[idx + 1] = img[idx + 2] = bit * 255;
+    img[idx + 3] = 255;
+    img[idx + 4] = img[idx + 5] = img[idx + 6] = bit * 255;
+    img[idx + 7] = 255;
+    idx += IMGWIDTH * 4;
+    img[idx + 0] = img[idx + 1] = img[idx + 2] = bit * 255;
+    img[idx + 3] = 255;
+    img[idx + 4] = img[idx + 5] = img[idx + 6] = bit * 255;
+    img[idx + 7] = 255;
+  }
+}
+</script>
+</head>
+<body>
+  <p>Choose file to convert: <input type="file" id="fileIn" accept="text/plain"></p>
+  <p><button onclick="data2img()">data -> img</button></p>
+  <p>Choose image to convert: <input type="file" id="fileIn2" accept="image/*"></p>
+  <p><button onclick="img2data()">img -> data</button></p>
+  <canvas id="canvas" width="960" height="720"></canvas>
+</body>
+</html>
