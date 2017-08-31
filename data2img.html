@@ -16,6 +16,8 @@
 var ctx;
 var IMGWIDTH = 960, IMGHEIGHT = 720;
 onload = function () {
+  canvas.width = IMGWIDTH;
+  canvas.height = IMGHEIGHT;
   ctx = canvas.getContext('2d');
   ctx.font = "30px serif";
   var text = "Image output here";
@@ -26,6 +28,14 @@ function data2img() {
   var fr = new FileReader();
   fr.onload = function() {
     var dat = fr.result;
+    console.log(dat);
+    if (dat.byteLength > 21600) {
+      IMGWIDTH = 2048, IMGHEIGHT = 1152;
+    }
+    else {
+      IMGWIDTH = 960, IMGHEIGHT = 720;
+    }
+    canvas.width = IMGWIDTH, canvas.height = IMGHEIGHT;
     drawBinary(dat);
   };
   fr.readAsArrayBuffer(fileIn.files[0]);
@@ -38,6 +48,13 @@ function img2data() {
     var dat = fr.result;
     var img = new Image();
     img.onload = function () {
+      if (img.width === 2048) {
+        IMGWIDTH = 2048, IMGHEIGHT = 1152;
+      }
+      else {
+        IMGWIDTH = 960, IMGHEIGHT = 720;
+      }
+      canvas.width = IMGWIDTH, canvas.height = IMGHEIGHT;
       ctx.drawImage(img, 0, 0);
       var imgdata = ctx.getImageData(0, 0, IMGWIDTH, IMGHEIGHT).data;
       decoded = decodeImg(imgdata);
